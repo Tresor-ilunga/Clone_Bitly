@@ -1,4 +1,38 @@
 <?php
+
+	if(!empty($_GET['q'])){
+		// Redirections de raccourci créés
+
+		//Variable
+		$shortcut = htmlspecialchars($_GET['q']);
+
+		// Existe-t-il un shortcut dans la base de donnée
+		$bdd = new PDO('mysql:host=localhost;dbname=bitly;charset=utf8', 'root', '');
+		$requete = $bdd->prepare('SELECT COUNT(*) AS nombre FROM links WHERE shortcut = ?');
+		$requete->execute([$shortcut]);
+
+		while($resultat = $requete->fetch()){
+			
+			if($resultat['nombre'] != 1){
+				header('location: ./?error=true&message="Adresse url non connue');
+				exit();
+			}
+		}
+
+		// Redirection
+		$requete = $bdd->prepare('SELECT * FROM links WHERE shortcut = ?');
+		$requete->execute([$shortcut]);
+
+		while($resultat = $requete->fetch()){
+		
+		header('location: '.$resultat['url']);
+		exit();
+		
+		}
+	}
+
+	
+
 	if(!empty($_POST['url'])){
 		// Variable
 		$url = htmlspecialchars($_POST['url']);
@@ -14,7 +48,7 @@
 		$shortcut = crypt($url, rand());
 
 		// Vérification d'un doublan
-		//$bdd = new PDO('mysql:host=localhost;dbname=bitly;charset=utf8', 'root', '');
+		$bdd = new PDO('mysql:host=localhost;dbname=bitly;charset=utf8', 'root', '');
 		//$req = $bdd->prepare('SELECT COUNT(*) AS nombre FROM links WHERE url = ?');
 		//$req->execute([$url]);
 
